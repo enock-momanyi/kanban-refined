@@ -1,0 +1,141 @@
+import { Card, Divider, Stack } from "@mui/material"
+import AddCard from "./AddCard"
+import ColumnCard from "./ColumnCard"
+import ColumnHeader from "./ColumnHeader"
+import { DragEvent, useRef, useState } from "react"
+import InputComponent from "./InputComponent"
+import uid from "@/utils/generateId"
+
+const KanbanColumn: React.FC<any> = ({columnId,columnTitle,cards,addCardFunc,setColumns})=> {
+    const [addCard, setAddCard] = useState<boolean>(false)
+    const [rename, setRename] = useState<boolean>(false)
+    const cardRef = useRef<HTMLInputElement>()
+    const titleRef=useRef<HTMLInputElement>()
+
+    const toggle=() => {
+        setAddCard(!addCard)
+    }
+
+    const cancelAdd = ()=> {
+        toggle();
+    }
+    const insertCard = () => {
+        const cardTitle = cardRef?.current?.value
+        if(!cardTitle) return
+        const card = {
+            id: uid(),
+            cardText: cardTitle,
+            columnId: columnId
+        }
+        addCardFunc(card)
+        cardRef!.current!.value = ''
+        toggle()
+    }
+    const handleOnDrag = (e: DragEvent<HTMLDivElement>,cardId:any) => {
+        /**
+         * set the caedId as the data to be tranferred on onDrag event
+         */
+        e.dataTransfer.setData("CardId",cardId)
+    }
+    const handleOnDrop = async (e: DragEvent<HTMLDivElement>, columnId: String) => {
+        e.preventDefault()
+        const cardId = e.dataTransfer.getData("cardId")
+        const card = JSON.parse(cardId)
+        if(card.columnId === columnId) return
+        setColumns((prevColumns:any[]) => prevColumns.map((col:any)=>{
+            //console.log(col)
+            if(card.columnId === col.id){
+                return {...col,cards: col.cards.filter(((cd:any) => cd.id !== card.id))}
+            }else if(col.id === columnId){
+                return {...col,cards:[...col.cards, {...card, columnId: columnId}]}
+            }
+            return col
+        }))
+        console.log(cardId)
+
+    }
+    
+    const handleOnDragOver = (e: DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+    }
+    const clearColumn = () => {
+        setColumns((prevColumns:any[]) =>prevColumns.map((col:any)=>{
+            if(columnId === col.id){
+                return {...col,cards: []}
+            }
+            return col
+        }))
+    }
+    const deleteColumn = () => {
+        setColumns((prevColumns:any[]) =>prevColumns.filter((col:any)=>{
+            //console.log(col)
+            return columnId !== col.id
+        }))
+    }
+    const renameColumn = () => {
+        const newTitle = titleRef!.current!.value
+        if(!newTitle || newTitle === columnTitle) return
+        setColumns((prevColumns:any[]) => prevColumns.map((col:any)=>{
+            //console.log(col)
+            if(columnId === col.id){
+                return {...col,columnTitle:newTitle}
+            }
+            return col
+        }))
+        setRename(prevRename=>!prevRename)
+    }
+    const functionSet = {
+        rename: ()=>{setRename(ren=>!ren)},
+        clear: clearColumn,
+        deleteColumn:deleteColumn
+    }
+    return(
+        <Card
+        onDragOver={(e) => handleOnDragOver(e)}
+        onDrop={(e)=> handleOnDrop(e,columnId)}
+        >
+            {
+                !rename && 
+                <ColumnHeader columnTitle={columnTitle} functionSet={functionSet} />
+            }
+            {
+                rename && <InputComponent
+                                label='Name'
+                                value={columnTitle}
+                                inputRefVar={titleRef}
+                                cancelFunc={()=>{setRename(ren=>!ren)}}
+                                addFunc={renameColumn} 
+                                            />
+            }
+            <Divider/>
+            <div className="flex flex-col items-center min-h-10">
+            { !!cards.length &&
+                cards.map((card:any) => {
+                    return(
+                        <ColumnCard key={card.id} cardText={card.cardText} handleOnDrag={(e: DragEvent<HTMLDivElement>) => handleOnDrag(e,JSON.stringify(card))}/>
+                    )
+                })
+
+        }
+        </div>
+            <Divider/> 
+            {
+                !addCard && 
+                <div className="flex justify-center">
+                    <AddCard buttonText="Add Card" buttonFunction={toggle} />
+                </div>
+            }
+            {
+                addCard && 
+                <InputComponent
+                    label='Title'
+                    inputRefVar={cardRef}
+                    cancelFunc={cancelAdd}
+                    addFunc={insertCard} 
+                    />
+            }
+        </Card>
+    )
+}
+
+export default KanbanColumn
