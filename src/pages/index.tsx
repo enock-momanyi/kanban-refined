@@ -4,9 +4,10 @@ import { Inter } from "next/font/google";
 import Header from "@/components/Header";
 import Board from "@/components/Board";
 import { useEffect, useState } from "react";
-
+import createApolloClient from "../../graphql/client/apollo";
+import { ApolloProvider, gql } from "@apollo/client";
 const inter = Inter({ subsets: ["latin"] });
-
+const client = createApolloClient()
 export default function Home() {
   const [allColumns, setAllColumns] = useState<any[]>([])
   let  columns= [
@@ -44,19 +45,22 @@ const addColumn = (newColumn:any) => {
   }
   setAllColumns(preColumns => [...preColumns,newColumn])
 }
+
   return (
     <>
-    <div className="bg-blue-200 h-screen">
-      <div className="mb-10">
-        <Header />
+    <ApolloProvider client={client} >
+      <div className="bg-blue-200 h-screen">
+        <div className="mb-10">
+          <Header />
+        </div>
+        <div>
+          <Board 
+            columns={allColumns} 
+            setColumns={setAllColumns}
+            addNewColumn={addColumn} />
+        </div>
       </div>
-      <div>
-        <Board 
-          columns={allColumns} 
-          setColumns={setAllColumns}
-          addNewColumn={addColumn} />
-      </div>
-    </div>
+    </ApolloProvider>
     </>
   );
 }
