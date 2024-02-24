@@ -22,18 +22,18 @@ export const resolvers = {
         }
     },
     Mutation:{
-        addColumn(_: any,args: { columnTitle: string }){
+        addColumn(_: any,args: {id:string, columnTitle: string }){
             if(db.columns.length == 5) return
             let column = {
-                id: db.columns.length + 1,
+                id: args.id,
                 columnTitle: args.columnTitle
             }
             db.columns.push(column)
             return column
         },
-        addCard(_: any,args: { columnId: string; cardText: string }){
+        addCard(_: any,args: {id:string, columnId: string; cardText: string }){
             let card = {
-                id: Math.floor(Math.random()*10000).toString(),
+                id: args.id,
                 columnId: args.columnId,
                 cardText: args.cardText
             }

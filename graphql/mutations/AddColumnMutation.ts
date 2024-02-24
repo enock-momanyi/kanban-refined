@@ -1,8 +1,8 @@
 import {gql} from '@apollo/client';
 
 const ADD_COLUMN = gql`
-    mutation AddColumn($columnTitle: String!){
-    addColumn(columnTitle: $columnTitle){
+    mutation AddColumn($id:ID!,$columnTitle: String!){
+    addColumn(id: $id, columnTitle: $columnTitle){
         id,
         columnTitle,
         cards{

@@ -1,4 +1,4 @@
-let columns:any = [{id:'1',columnTitle:'To Do'}]
+let columns:any = []
 let cards:any = []
 
 export default {cards,columns}

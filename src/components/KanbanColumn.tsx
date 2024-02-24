@@ -5,10 +5,18 @@ import ColumnHeader from "./ColumnHeader"
 import { DragEvent, useRef, useState } from "react"
 import InputComponent from "./InputComponent"
 import uid from "@/utils/generateId"
+import useMoveCard from "@/utils/useMoveCard"
+import useClearColumn from "@/utils/useClearColumn"
+import useDeleteColumn from "@/utils/useDeleteColumn"
+import useRenameColumn from "@/utils/useRenameColumn"
 
 const KanbanColumn: React.FC<any> = ({columnId,columnTitle,cards,addCardFunc,setColumns})=> {
     const [addCard, setAddCard] = useState<boolean>(false)
     const [rename, setRename] = useState<boolean>(false)
+    const {moveCardDB,error} = useMoveCard()
+    const {clearColumnDB, clearError} = useClearColumn()
+    const {deleteColumnDB, deleteError} = useDeleteColumn()
+    const {renameColumnDB, renameError} = useRenameColumn()
     const cardRef = useRef<HTMLInputElement>()
     const titleRef=useRef<HTMLInputElement>()
 
@@ -43,7 +51,6 @@ const KanbanColumn: React.FC<any> = ({columnId,columnTitle,cards,addCardFunc,set
         const card = JSON.parse(cardId)
         if(card.columnId === columnId) return
         setColumns((prevColumns:any[]) => prevColumns.map((col:any)=>{
-            //console.log(col)
             if(card.columnId === col.id){
                 return {...col,cards: col.cards.filter(((cd:any) => cd.id !== card.id))}
             }else if(col.id === columnId){
@@ -51,7 +58,7 @@ const KanbanColumn: React.FC<any> = ({columnId,columnTitle,cards,addCardFunc,set
             }
             return col
         }))
-        console.log(cardId)
+        moveCardDB({variables:{cardId: card.id, newColumnId: columnId}})
 
     }
     
@@ -65,23 +72,25 @@ const KanbanColumn: React.FC<any> = ({columnId,columnTitle,cards,addCardFunc,set
             }
             return col
         }))
+        clearColumnDB({variables:{columnId}})
     }
     const deleteColumn = () => {
         setColumns((prevColumns:any[]) =>prevColumns.filter((col:any)=>{
             //console.log(col)
             return columnId !== col.id
         }))
+        deleteColumnDB({variables:{columnId}})
     }
     const renameColumn = () => {
         const newTitle = titleRef!.current!.value
         if(!newTitle || newTitle === columnTitle) return
         setColumns((prevColumns:any[]) => prevColumns.map((col:any)=>{
-            //console.log(col)
             if(columnId === col.id){
                 return {...col,columnTitle:newTitle}
             }
             return col
         }))
+        renameColumnDB({variables:{columnId, columnTitle: newTitle}})
         setRename(prevRename=>!prevRename)
     }
     const functionSet = {

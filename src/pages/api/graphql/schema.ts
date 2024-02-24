@@ -17,8 +17,8 @@ export const typeDefs= `#graphql
         hello: String!
     }
     type Mutation{
-        addColumn(columnTitle: String!): Column
-        addCard(cardText: String!, columnId: ID!): Card
+        addColumn(id:ID!, columnTitle: String!): Column
+        addCard(id:ID!, cardText: String!, columnId: ID!): Card
         editCard(cardId: ID!, updatedText: String!): Card
         renameColumn(columnId: ID!, columnTitle: String!): Column
         clearColumn(columnId: ID!): String
