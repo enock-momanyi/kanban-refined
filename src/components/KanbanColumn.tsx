@@ -2,7 +2,7 @@ import { Card, Divider, Stack } from "@mui/material"
 import AddCard from "./AddCard"
 import ColumnCard from "./ColumnCard"
 import ColumnHeader from "./ColumnHeader"
-import { DragEvent, useRef, useState } from "react"
+import { DragEvent, useEffect, useRef, useState } from "react"
 import InputComponent from "./InputComponent"
 import uid from "@/utils/generateId"
 import useMoveCard from "@/utils/useMoveCard"
@@ -10,10 +10,10 @@ import useClearColumn from "@/utils/useClearColumn"
 import useDeleteColumn from "@/utils/useDeleteColumn"
 import useRenameColumn from "@/utils/useRenameColumn"
 
-const KanbanColumn: React.FC<any> = ({columnId,columnTitle,cards,addCardFunc,setColumns})=> {
+const KanbanColumn: React.FC<any> = ({columnId,columnTitle,cards,addCardFunc,setColumns, setMessage})=> {
     const [addCard, setAddCard] = useState<boolean>(false)
     const [rename, setRename] = useState<boolean>(false)
-    const {moveCardDB,error} = useMoveCard()
+    const {moveCardDB,moveError} = useMoveCard()
     const {clearColumnDB, clearError} = useClearColumn()
     const {deleteColumnDB, deleteError} = useDeleteColumn()
     const {renameColumnDB, renameError} = useRenameColumn()
@@ -27,6 +27,11 @@ const KanbanColumn: React.FC<any> = ({columnId,columnTitle,cards,addCardFunc,set
     const cancelAdd = ()=> {
         toggle();
     }
+    useEffect(()=>{
+        if(moveError || clearError || deleteError || renameError){
+            setMessage("Network offline. Data not saved")
+        }
+    })
     const insertCard = () => {
         const cardTitle = cardRef?.current?.value
         if(!cardTitle) return
@@ -58,30 +63,31 @@ const KanbanColumn: React.FC<any> = ({columnId,columnTitle,cards,addCardFunc,set
             }
             return col
         }))
-        moveCardDB({variables:{cardId: card.id, newColumnId: columnId}})
+        
+        await moveCardDB({variables:{cardId: card.id, newColumnId: columnId}})
 
     }
     
     const handleOnDragOver = (e: DragEvent<HTMLDivElement>) => {
         e.preventDefault()
     }
-    const clearColumn = () => {
+    const clearColumn = async() => {
         setColumns((prevColumns:any[]) =>prevColumns.map((col:any)=>{
             if(columnId === col.id){
                 return {...col,cards: []}
             }
             return col
         }))
-        clearColumnDB({variables:{columnId}})
+        await clearColumnDB({variables:{columnId}})
     }
-    const deleteColumn = () => {
+    const deleteColumn = async() => {
         setColumns((prevColumns:any[]) =>prevColumns.filter((col:any)=>{
             //console.log(col)
             return columnId !== col.id
         }))
-        deleteColumnDB({variables:{columnId}})
+        await deleteColumnDB({variables:{columnId}})
     }
-    const renameColumn = () => {
+    const renameColumn = async () => {
         const newTitle = titleRef!.current!.value
         if(!newTitle || newTitle === columnTitle) return
         setColumns((prevColumns:any[]) => prevColumns.map((col:any)=>{
@@ -90,7 +96,7 @@ const KanbanColumn: React.FC<any> = ({columnId,columnTitle,cards,addCardFunc,set
             }
             return col
         }))
-        renameColumnDB({variables:{columnId, columnTitle: newTitle}})
+        await renameColumnDB({variables:{columnId, columnTitle: newTitle}})
         setRename(prevRename=>!prevRename)
     }
     const functionSet = {

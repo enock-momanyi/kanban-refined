@@ -4,6 +4,10 @@ import '@testing-library/jest-dom'
 import Board from '@/components/Board';
 
 import { columns } from '../mocks/columnData';
+import { mockedRenameColumnMutation } from '../mocks/mockedMutations';
+import { MockedProvider } from '@apollo/client/testing';
+
+const mocks = [mockedRenameColumnMutation]
 
 it('should should call setColumns state function after click clear', async() => {
     const setState = jest.fn()
@@ -42,7 +46,11 @@ it('should should call setColumns state function after click clear', async() => 
         addNewColumn:jest.fn(),
         setColumns: setColumns
     }
-    render(<Board {...props} />)
+    render(
+        <MockedProvider mocks={mocks} addTypename={false}>
+            <Board {...props} />
+        </MockedProvider>
+    )
     const threeDots = screen.getAllByTestId('MoreHorizSharpIcon')[0]
     const cardText = screen.getByText('Create Reusable component')
     fireEvent.click(threeDots)
@@ -52,8 +60,5 @@ it('should should call setColumns state function after click clear', async() => 
     fireEvent.change(textBox,{target:{value:"To Do Nothing"}})
     const renameTitleButton = screen.getByText('Rename')
     fireEvent.click(renameTitleButton)
-    /***
-     * Implement this todayfirday
-     */
     expect(renameButton).not.toBeInTheDocument()
 })

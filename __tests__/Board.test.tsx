@@ -4,6 +4,11 @@ import '@testing-library/jest-dom'
 import Board from '@/components/Board';
 
 import { columns } from '../mocks/columnData';
+import {MockedProvider} from '@apollo/client/testing'
+import { mockedAddCardMutation, mockedAddColumnMutation } from '../mocks/mockedMutations';
+
+const mocks = [mockedAddCardMutation, mockedAddColumnMutation]
+
 
 it('should contain the text "Add Column"',()=>{
     const props ={
@@ -11,8 +16,11 @@ it('should contain the text "Add Column"',()=>{
         addNewColumn:jest.fn(),
         setColumns: jest.fn()
     }
-
-    render(<Board {...props} />)
+    render(
+        <MockedProvider mocks={mocks} addTypename={false}>
+            <Board {...props} />
+        </MockedProvider>
+    )
     expect(screen.getByText("Add Column")).toBeInTheDocument()
 })
 it('should not contain add column textbox after cancel click event',()=>{
@@ -21,7 +29,11 @@ it('should not contain add column textbox after cancel click event',()=>{
         addNewColumn:jest.fn(),
         setColumns: jest.fn()
     }
-    render(<Board {...props} />)
+    render(
+        <MockedProvider mocks={mocks} addTypename={false}>
+            <Board {...props} />
+        </MockedProvider>
+    )
     const buttonAddColumn = screen.getByText("Add Column")
     fireEvent.click(buttonAddColumn)
     const textBox = screen.getByLabelText('Name')
@@ -41,7 +53,11 @@ it('should contain text "RandomTitle" after add click event',async ()=>{
         addNewColumn:jest.fn(),
         setColumns: setColumns
     }
-    render(<Board {...props} />)
+    render(
+        <MockedProvider mocks={mocks} addTypename={false}>
+            <Board {...props} />
+        </MockedProvider>
+    )
     const buttonAddColumn = screen.getByText("Add Column")
     fireEvent.click(buttonAddColumn)
     const textBox = screen.getByLabelText('Name')
@@ -61,7 +77,11 @@ it('should contain text "Test reusable component" after addCard on column 1 clic
         addNewColumn:jest.fn(),
         setColumns: setColumns
     }
-    render(<Board {...props} />)
+    render(
+        <MockedProvider mocks={mocks} addTypename={false}>
+            <Board {...props} />
+        </MockedProvider>
+    )
     const buttonAddCard = screen.getAllByText("Add Card")[0]
     fireEvent.click(buttonAddCard)
     const textBox = screen.getByLabelText('Title')

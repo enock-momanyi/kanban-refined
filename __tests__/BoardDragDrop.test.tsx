@@ -4,6 +4,10 @@ import '@testing-library/jest-dom'
 import Board from '@/components/Board';
 
 import { columns } from '../mocks/columnData';
+import { mockedMoveCardMutation } from '../mocks/mockedMutations';
+import { MockedProvider } from '@apollo/client/testing';
+
+const mocks = [mockedMoveCardMutation]
 
 it('should call move card function', async () => {
     const setState = jest.fn()
@@ -43,7 +47,11 @@ it('should call move card function', async () => {
         addNewColumn:jest.fn(),
         setColumns: setColumns
     }
-    render(<Board {...props} />)
+    render(
+      <MockedProvider mocks={mocks} addTypename={false}>
+        <Board {...props} />
+      </MockedProvider>
+    )
     const inputElem = screen.getByDisplayValue(props.columns[0].cards[0].cardText)
     const dropTarget = screen.getByText(props.columns[1].columnTitle)
     

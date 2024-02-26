@@ -11,6 +11,7 @@ const InputComponent:React.FC<any> = ({label, inputRefVar, cancelFunc, addFunc,v
                     defaultValue={value}
                     inputRef={inputRefVar}
                     label={label}
+                    multiline={false}
                 />
                 <Stack direction="row" justifyContent="space-between" >
                     <Button onClick={cancelFunc}>Cancel</Button>

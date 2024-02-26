@@ -5,7 +5,8 @@ import { typeDefs } from "./schema";
 
 const server = new ApolloServer({
     resolvers: resolvers,
-    typeDefs: typeDefs
+    typeDefs: typeDefs,
+    introspection:true
 })
 
 export default startServerAndCreateNextHandler(server)

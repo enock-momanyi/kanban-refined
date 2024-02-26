@@ -3,8 +3,13 @@ import '@testing-library/jest-dom'
 
 
 import KanbanColumn from '@/components/KanbanColumn';
+import { mockedAddCardMutation, mockedAddColumnMutation, mockedClearColumnMutation, mockedDeleteColumnMutation, mockedEditCardMutation, mockedMoveCardMutation, mockedRenameColumnMutation } from '../mocks/mockedMutations';
+import { MockedProvider } from '@apollo/client/testing';
 
 
+const mocks = [mockedMoveCardMutation, mockedClearColumnMutation, mockedDeleteColumnMutation
+,mockedRenameColumnMutation,mockedAddCardMutation,
+ mockedAddColumnMutation,mockedEditCardMutation]
 
 it('should call the setColumns state function when you clear a column ', () => {
     const props = {
@@ -23,8 +28,11 @@ it('should call the setColumns state function when you clear a column ', () => {
     // props.setColumns.mockImplementation((arr:any[])=>{
     //     return arr;
     // })
-    
-    render(<KanbanColumn {...props}/>)
+    render(
+        <MockedProvider mocks={mocks} addTypename={false}>
+            <KanbanColumn {...props}/>
+        </MockedProvider>
+    )
     const threeDots = screen.getByTestId('MoreHorizSharpIcon')
     const cardText = screen.getByText('Create Reusable component')
     fireEvent.click(threeDots)
@@ -50,7 +58,11 @@ it('should not have not have element with label title once cancel is clicked ', 
     //     return arr;
     // })
     
-    render(<KanbanColumn {...props}/>)
+    render(
+        <MockedProvider mocks={mocks} addTypename={false}>
+            <KanbanColumn {...props}/>
+        </MockedProvider>
+    )
     const addCardButton = screen.getByText('Add Card')
     fireEvent.click(addCardButton)
     const inputElem = screen.getByLabelText('Title')

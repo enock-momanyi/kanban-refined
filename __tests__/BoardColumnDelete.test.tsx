@@ -4,7 +4,9 @@ import '@testing-library/jest-dom'
 import Board from '@/components/Board';
 
 import { columns } from '../mocks/columnData';
-
+import { mockedDeleteColumnMutation } from '../mocks/mockedMutations';
+import { MockedProvider } from '@apollo/client/testing';
+const mocks = [mockedDeleteColumnMutation]
 it('should should call setColumns state function after click delete ', async() => {
     const setState = jest.fn()
     setState.mockImplementation((newState:any)=>{
@@ -43,7 +45,11 @@ it('should should call setColumns state function after click delete ', async() =
         addNewColumn:jest.fn(),
         setColumns: setColumns
     }
-    render(<Board {...props} />)
+    render(
+        <MockedProvider mocks={mocks} addTypename={false}>
+            <Board {...props} />
+        </MockedProvider>
+    )
     const threeDots = screen.getAllByTestId('MoreHorizSharpIcon')[0]
     const cardText = screen.getByText('Create Reusable component')
     fireEvent.click(threeDots)

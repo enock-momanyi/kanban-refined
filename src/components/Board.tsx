@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import AddCard from "./AddCard"
 import KanbanColumn from "./KanbanColumn"
 import InputComponent from "./InputComponent"
@@ -6,11 +6,13 @@ import uid from "@/utils/generateId"
 import useAddColumn from "@/utils/useAddColumn"
 import useAddCard from "@/utils/useAddCard"
 import { CardInt } from "../../interfaces/types"
+import { Alert } from "@mui/material"
 
 const Board:React.FC<any> = ({columns,setColumns}) => {
     const [addColumn,setAddColumn] = useState(false)
-    const {addColumnDB, columnError} = useAddColumn()
-    const {addCardDB, cardError} = useAddCard()
+    const [message, setMessage] = useState<string>()
+    const {addColumnDB,columnError} = useAddColumn()
+    const {addCardDB,cardError} = useAddCard()
     const columnRef = useRef<HTMLInputElement>();
     const componentLabel = 'Name';
 
@@ -21,7 +23,7 @@ const Board:React.FC<any> = ({columns,setColumns}) => {
         toggle();
     }
 
-    const insertCard = (card: CardInt) => {
+    const insertCard = async(card: CardInt) => {
         const columnCopy =columns.slice()
         setColumns(
             columnCopy.map((col:any) => {
@@ -31,10 +33,9 @@ const Board:React.FC<any> = ({columns,setColumns}) => {
                 return col
             })
             )
-        addCardDB({variables:{...card}})
-        
+       await addCardDB({variables:{...card}})     
     }
-    const insertColumn = () => {
+    const insertColumn = async () => {
         const columnName = columnRef?.current?.value;
         if(!columnName) return
         const column= {
@@ -43,17 +44,20 @@ const Board:React.FC<any> = ({columns,setColumns}) => {
             cards:[]
         }
         setColumns([...columns,column])
-        addColumnDB({variables:{id:column.id, columnTitle: column.columnTitle}})
-        if(columnError){
-            console.log("Cannot add to DB!")
-        }
+        await addColumnDB({variables:{id:column.id, columnTitle: column.columnTitle}})
         columnRef!.current!.value = ''
         toggle()
     }
+    useEffect(()=>{
+        if(columnError || cardError){
+            setMessage('Network offline. Data not saved')
+        }
+    })
     return (
         //board has array of columns
+        <>
+        {message && <Alert severity="error">{message}</Alert>}
         <div className="grid grid-cols-5 gap-3">
-            
                 { !!columns.length &&
                 columns.map((col:any) => 
                         <div key={col.id}>
@@ -64,6 +68,7 @@ const Board:React.FC<any> = ({columns,setColumns}) => {
                             columnTitle={col.columnTitle} 
                             addCardFunc={insertCard} 
                             setColumns={setColumns}
+                            setMessage={setMessage}
                             />
                         </div>
                 )
@@ -85,6 +90,7 @@ const Board:React.FC<any> = ({columns,setColumns}) => {
                                 addFunc={insertColumn}
                                 />}
         </div>
+        </>
     )
 }
 

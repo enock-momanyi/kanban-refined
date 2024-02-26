@@ -4,6 +4,8 @@ import GET_COLUMN from "../../graphql/queries/GetColumnQuery";
 
 const useAddColumn = () => {
     const [addColumnDB, {error}] = useMutation(ADD_COLUMN,{
+        onError:()=>{
+        },
         refetchQueries:[
             GET_COLUMN
         ]
